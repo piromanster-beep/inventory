@@ -14,7 +14,7 @@
 - Бэкап в формате Excel , восстановление из бэкапа
 
 ## Установка
-( Linux , Windows , все равно что , но с питоном)
+( Windows с  установленным python )
 Клонируйте репозитарий, в нем.
 ```bash
 pip install -r requirements.txt
