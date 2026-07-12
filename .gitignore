@@ -19,7 +19,6 @@ __pycache__/
 *.so
 *.egg
 *.egg-info/
-dist/
 build/
 *.whl
 
@@ -38,9 +37,6 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Шаблоны (если они содержат персональные данные)
-templates/
-!templates/example_template.xlsx
 
 # Логи
 *.log
