@@ -1,0 +1,50 @@
+# База данных (ваши данные!)
+*.db
+*.sqlite
+*.sqlite3
+
+# Сгенерированные отчеты
+списание_*.xlsx
+report_*.xlsx
+stock_report_*.xlsx
+*.xls
+*.ods
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+
+# Виртуальное окружение
+venv/
+.env/
+.venv/
+ENV/
+
+# Файлы IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Шаблоны (если они содержат персональные данные)
+templates/
+!templates/example_template.xlsx
+
+# Логи
+*.log
+
+# Временные файлы
+tmp/
+temp/
