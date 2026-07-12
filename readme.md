@@ -19,7 +19,7 @@
 - Запускаем
 
 
- Windows с  установленным python и желанием править
+ Windows с  установленным python и желанием править  
 Клонируйте репозитарий, в нем.
 ```bash
 pip install -r requirements.txt
