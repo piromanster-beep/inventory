@@ -16,6 +16,7 @@ class ReportsTab:
         ttk.Button(frame, text="📈 Отчет за год", command=self.on_report_year).pack(pady=5)
         ttk.Button(frame, text="📋 Отчет по остаткам", command=self.on_report_stock).pack(pady=5)
         ttk.Button(frame, text="📄 Отчет по шаблону", command=self.on_custom_report).pack(pady=5)
+        ttk.Button(frame, text="🏢 Расход по отделам", command=self.on_department_report).pack(pady=5)
         
         ttk.Separator(frame, orient='horizontal').pack(fill='x', pady=10)
         ttk.Button(frame, text="📤 Экспорт базы (бекап)", command=self.on_backup).pack(pady=5)
@@ -93,3 +94,35 @@ class ReportsTab:
             messagebox.showinfo("Успех", msg)
         else:
             messagebox.showerror("Ошибка", msg)
+            
+    def on_department_report(self):
+        """Генерирует отчёт по расходам по отделам"""
+        # Спрашиваем период
+        period = simpledialog.askstring(
+            "Период",
+            "Выберите период:\n"
+            "1 - за месяц\n"
+            "2 - за год\n\n"
+            "Введите 1 или 2:"
+        )
+    
+        if period not in ('1', '2'):
+            messagebox.showinfo("Информация", "Отчёт отменён или выбран неверный период")
+            return
+    
+        year = simpledialog.askinteger("Год", "Введите год:", minvalue=2000, maxvalue=2100)
+        if year is None:
+            return
+    
+        month = None
+        if period == '1':  # За месяц
+            month = simpledialog.askinteger("Месяц", "Введите месяц (1-12):", minvalue=1, maxvalue=12)
+            if month is None:
+                return
+    
+        filename = utils.generate_department_report(year, month)
+        if filename:
+            messagebox.showinfo("Успех", f"Отчёт сохранен:\n{filename}")
+            os.startfile(filename)
+        else:
+            messagebox.showinfo("Информация", "Нет данных за указанный период")

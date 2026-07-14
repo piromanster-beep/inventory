@@ -55,6 +55,7 @@ def generate_report(report_type, year=None, month=None):
     df.to_excel(filename, index=False, engine='openpyxl')
     return filename
 
+
 def generate_custom_report(month, year):
     os.makedirs('templates', exist_ok=True)
     template_path = os.path.join('templates', 'spisanie_template.xlsx')
@@ -124,6 +125,7 @@ def generate_custom_report(month, year):
     wb.save(filename)
     return filename
 
+
 def create_example_template():
     os.makedirs('templates', exist_ok=True)
     template_path = os.path.join('templates', 'spisanie_template.xlsx')
@@ -143,20 +145,53 @@ def create_example_template():
     ws['C6'] = "Ответственный 2"
     wb.save(template_path)
     return template_path
+
+
+def generate_department_report(year, month=None):
+    """
+    Генерирует отчёт по расходу картриджей по отделам (какие модели и сколько).
+    Если month=None — за год, иначе за конкретный месяц.
+    """
+    conn = sqlite3.connect('inventory.db')
     
-   
+    if month:
+        date_filter = f"strftime('%m', i.issue_date) = '{month:02d}' AND strftime('%Y', i.issue_date) = '{year}'"
+        period_name = f"{month:02d}.{year}"
+    else:
+        date_filter = f"strftime('%Y', i.issue_date) = '{year}'"
+        period_name = str(year)
+    
+    query = f"""
+        SELECT 
+            d.name AS 'Отдел',
+            m.model AS 'Модель',
+            SUM(i.quantity) AS 'Количество'
+        FROM issues i
+        JOIN departments d ON i.department_id = d.id
+        JOIN models m ON i.model_id = m.id
+        WHERE {date_filter}
+        GROUP BY d.name, m.model
+        ORDER BY d.name, m.model
+    """
+    
+    df = pd.read_sql_query(query, conn)
+    conn.close()
+    
+    if df.empty:
+        return None
+    
+    filename = f"department_usage_{period_name}.xlsx"
+    df.to_excel(filename, index=False, engine='openpyxl')
+    
+    return filename
+
+# ---------- БЕКАП И ВОССТАНОВЛЕНИЕ ----------
 
 def backup_database():
     """Экспортирует все данные в Excel-файл"""
     conn = sqlite3.connect('inventory.db')
-    
-    # Список таблиц для экспорта
     tables = ['departments', 'employees', 'models', 'incoming', 'issues']
-    
-    # Создаем папку для бекапов, если её нет
     os.makedirs('backups', exist_ok=True)
-    
-    # Имя файла с датой
     filename = f"backups/backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
     
     with pd.ExcelWriter(filename, engine='openpyxl') as writer:
@@ -170,12 +205,12 @@ def backup_database():
     conn.close()
     return filename
 
+
 def restore_from_backup(filepath):
     """Восстанавливает базу данных из Excel-файла"""
     if not os.path.exists(filepath):
         return False, "Файл не найден"
     
-    # Читаем все листы из Excel
     try:
         xls = pd.ExcelFile(filepath)
         sheet_names = xls.sheet_names
@@ -183,10 +218,8 @@ def restore_from_backup(filepath):
         conn = sqlite3.connect('inventory.db')
         cur = conn.cursor()
         
-        # Отключаем проверку внешних ключей на время восстановления
         cur.execute("PRAGMA foreign_keys = OFF")
         
-        # Список таблиц и их колонок (для правильного порядка)
         table_columns = {
             'departments': ['id', 'name'],
             'employees': ['id', 'name', 'department_id'],
@@ -196,30 +229,22 @@ def restore_from_backup(filepath):
                        'quantity', 'issue_date', 'status', 'notes']
         }
         
-        # Очищаем существующие таблицы
         for table in table_columns.keys():
             if table in sheet_names:
                 cur.execute(f"DELETE FROM {table}")
         
-        # Восстанавливаем данные из каждого листа
         for table, columns in table_columns.items():
             if table not in sheet_names:
                 continue
             
             df = pd.read_excel(filepath, sheet_name=table)
-            
-            # Убеждаемся, что все колонки есть
             for col in columns:
                 if col not in df.columns:
                     df[col] = None
             
-            # Приводим порядок колонок к нужному
             df = df[columns]
-            
-            # Заменяем NaN на None для SQLite
             df = df.where(pd.notna(df), None)
             
-            # Вставляем данные
             placeholders = ','.join(['?' for _ in columns])
             col_names = ','.join(columns)
             
@@ -230,7 +255,6 @@ def restore_from_backup(filepath):
                 except Exception as e:
                     print(f"Ошибка при вставке в {table}: {e}")
         
-        # Включаем проверку внешних ключей обратно
         cur.execute("PRAGMA foreign_keys = ON")
         conn.commit()
         conn.close()
@@ -239,4 +263,3 @@ def restore_from_backup(filepath):
         
     except Exception as e:
         return False, f"Ошибка при восстановлении: {str(e)}"
-    
