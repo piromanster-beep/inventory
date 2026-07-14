@@ -274,3 +274,15 @@ def rename_model(old_name, new_name):
     except sqlite3.IntegrityError:
         conn.close()
         return False, "Модель с таким именем уже существует!"
+       
+        # ---------- ДОПОЛНИТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ УДОБСТВА ----------
+def add_model_with_stock(name, quantity, notes=''):
+    """
+    Добавляет модель и сразу создаёт приход, если quantity > 0
+    """
+    success, msg = add_model(name)
+    if not success:
+        return False, msg
+    if quantity > 0:
+        add_incoming(name, quantity, notes or "Начальный остаток")
+    return True, ""
