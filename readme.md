@@ -49,29 +49,31 @@ python main.py
 - Выдавайте материалы отделам.
 - Генерируйте отчеты.
 
-inventory-system/
-│
-├── main.py                      # Главный файл — точка входа, интерфейс (Tkinter)
-│
-├── database.py                  # Работа с SQLite: CRUD, справочники, операции
-│
-├── utils.py                     # Вспомогательные функции: отчёты, бэкап, шаблоны
-│
-├── requirements.txt             # Все зависимости для pip
-│
-├── README.md                    # Описание проекта
-│
-├── LICENSE                      # Лицензия (MIT)
-│
-├── .gitignore                   # Исключения для Git
-│
-├── templates/                   # Пользовательские шаблоны отчётов
-│   └── spisanie_template.xlsx   # Пример шаблона "Списание"
-│
-├── backups/                     # Автоматические бэкапы базы (Excel)
-│   └── backup_20260712_143022.xlsx
-│
-├── inventory.db                 # База данных SQLite (создаётся автоматически)
-│
-└── dist/                        # Собранный .exe (после PyInstaller)
-    └── InventorySystem.exe      # Готовое приложение для Windows
+---
+
+## 📄 Описание файлов
+
+| Файл | Назначение |
+|------|------------|
+| **`main.py`** | Главное окно программы. Вкладки: "Склад", "Выдача", "Отчеты". Все обработчики кнопок и диалоги. |
+| **`database.py`** | Все функции для работы с SQLite: `init_db()`, `add_issue()`, `get_stock()`, `add_department()`, `delete_employee()` и др. |
+| **`utils.py`** | Генерация отчётов, работа с шаблонами, бэкап и восстановление. |
+| **`requirements.txt`** | Список библиотек: `pandas`, `openpyxl`, `xlrd`. |
+| **`templates/`** | Папка с шаблонами Excel. Программа ищет здесь `spisanie_template.xlsx`. |
+| **`backups/`** | Создаётся автоматически при первом бэкапе. Внутри — Excel-файлы со всеми таблицами. |
+| **`inventory.db`** | SQLite-база. Создаётся при первом запуске. |
+| **`dist/`** | Появляется после сборки `.exe` через PyInstaller. |
+
+---
+
+## 🧠 Связи модулей
+
+```mermaid
+graph TD
+    A[main.py] --> B[database.py]
+    A --> C[utils.py]
+    B --> D[inventory.db]
+    C --> D
+    C --> E[templates/]
+    C --> F[backups/]
+```
